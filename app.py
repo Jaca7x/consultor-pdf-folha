@@ -59,7 +59,7 @@ def extrair_dados(arquivo):
 
     m = re.search(r'Total EMPRESA:[^\n]+', texto)
     if m:
-        nums = re.findall(r'\d+\.\d{3},\d{2}', m.group(0))
+        nums = re.findall(r'(?:\d+\.)?\d+,\d{2}', m.group(0))
         dctf = nums[-1] if nums else "0,00"
     else:
         dctf = "0,00" 
