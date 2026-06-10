@@ -73,11 +73,15 @@ registros = carregar_dados()
 arquivo = st.file_uploader("Envie o PDF da folha", type="pdf")
 
 if arquivo:
-    with st.spinner("Extraindo dados..."):
-        dados = extrair_dados(arquivo)
-    registros.append(dados)
-    salvar_dados(registros)
-    st.success(f"✅ {dados['Nome_Empresa']} adicionado!")
+    if "ultimo_arquivo" not in st.session_state or st.session_state.ultimo_arquivo != arquivo.name:
+        with st.spinner("Extraindo dados..."):
+            dados = extrair_dados(arquivo)
+        registros.append(dados)
+        salvar_dados(registros)
+        st.session_state.ultimo_arquivo = arquivo.name
+        st.success(f"✅ {dados['Nome_Empresa']} adicionado!")
+    else:
+        st.info("Arquivo já processado. Envie outro PDF.")
 
 # Mostra tabela acumulada
 if registros:
