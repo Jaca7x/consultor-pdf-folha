@@ -42,11 +42,11 @@ def extrair_dados(arquivo):
     m = re.search(r'11 - FGTS mensal\s+([\d.,]+)', texto)
     fgts_11 = m.group(1) if m else "NÃO ENCONTRADO"
 
-    m = re.search(r'Total FGTS Mensal\s+\d+\s+([\d.,]+)', texto)
-    fgts_total = m.group(1) if m else "NÃO ENCONTRADO"
+    m = re.search(r'Empr[eé]stimo Cr[eé]dito do Trabalhador\s+\d+\s+([\d.,]+)', texto)
+    fgts_consignado = m.group(1) if m else ""
 
     m = re.search(r'Total Descontos Sindicais\s+\d+\s+[\d.,]+\s+([\d.,]+)', texto)
-    sindicato = m.group(1) if m else "0,00"
+    sindicato = m.group(1) if m else ""
 
     m = re.search(r'Total CP SEGURADOS\s+([\d.,]+)', texto)
     inss = m.group(1) if m else "NÃO ENCONTRADO"
@@ -60,7 +60,7 @@ def extrair_dados(arquivo):
         "Qtd_Funcionarios": qtd,
         "Total_Liquido":    liquido,
         "FGTS_11_Mensal":   fgts_11,
-        "FGTS_Total_Mensal": fgts_total,
+        "FGTS_Consignado": fgts_consignado,
         "Total_Sindicato":  sindicato,
         "INSS_Segurados":   inss,
         "IRRF_Total":       irrf,
@@ -73,12 +73,17 @@ registros = carregar_dados()
 arquivo = st.file_uploader("Envie o PDF da folha", type="pdf")
 
 if arquivo:
-    if "ultimo_arquivo" not in st.session_state or st.session_state.ultimo_arquivo != arquivo.name:
+    import hashlib
+    conteudo = arquivo.read()
+    arquivo.seek(0)
+    hash_arquivo = hashlib.md5(conteudo).hexdigest()
+
+    if "ultimo_hash" not in st.session_state or st.session_state.ultimo_hash != hash_arquivo:
         with st.spinner("Extraindo dados..."):
             dados = extrair_dados(arquivo)
         registros.append(dados)
         salvar_dados(registros)
-        st.session_state.ultimo_arquivo = arquivo.name
+        st.session_state.ultimo_hash = hash_arquivo
         st.success(f"✅ {dados['Nome_Empresa']} adicionado!")
     else:
         st.info("Arquivo já processado. Envie outro PDF.")
