@@ -13,7 +13,7 @@ def extrair_dados(arquivo):
         paginas = [p.extract_text() or "" for p in pdf.pages]
     texto = "\n".join(paginas)
 
-    m = re.search(r'Empresa:\s', texto)
+    m = re.search(r'Empresa:\s*[\d.,]', texto)
     codigo_empresa = m.group(1).strip() if m else "NÃO ENCONTRADO"
     nome_empresa = m.group(2).strip() if m else "NÃO ENCONTRADO"
 
