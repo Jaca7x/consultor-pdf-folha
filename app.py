@@ -31,34 +31,34 @@ def extrair_dados(arquivo):
     nome_empresa   = m.group(2).strip() if m else "NÃO ENCONTRADO"
 
     m = re.search(r'1 - Empregado\s+(\d+)', texto)
-    qtd = m.group(1) if m else "NÃO ENCONTRADO"
+    qtd = m.group(1) if m else "0"
 
     m = re.search(
         r'Totais\s*\n\s*Proventos:\s*[\d.,]+\s+Vantagens:\s*[\d.,]+\s+Descontos:\s*[\d.,]+\s+L[íi]quido:\s*([\d.,]+)',
         texto
     )
-    liquido = m.group(1) if m else "NÃO ENCONTRADO"
+    liquido = m.group(1) if m else "0,00"
 
     m = re.search(r'11 - FGTS mensal\s+([\d.,]+)', texto)
-    fgts_11 = m.group(1) if m else "NÃO ENCONTRADO"
+    fgts_11 = m.group(1) if m else "0,00"
 
     m = re.search(r'Empr[eé]stimo Cr[eé]dito do Trabalhador\s+\d+\s+([\d.,]+)', texto)
     fgts_consignado = m.group(1) if m else ""
 
     m = re.search(r'Total FGTS Mensal\s+\d+\s+([\d.,]+)', texto)
-    fgts_total = m.group(1) if m else "NÃO ENCONTRADO"
+    fgts_total = m.group(1) if m else "0,00"
 
     m = re.search(r'Total Descontos Sindicais\s+\d+\s+[\d.,]+\s+([\d.,]+)', texto)
     sindicato = m.group(1) if m else ""
 
     m = re.search(r'Total CP SEGURADOS\s+([\d.,]+)', texto)
-    inss = m.group(1) if m else "NÃO ENCONTRADO"
+    inss = m.group(1) if m else "0,00"
 
     m = re.search(r'Total IRRF\s+([\d.,]+)\s+0,00', texto)
-    irrf = m.group(1) if m else "NÃO ENCONTRADO"
+    irrf = m.group(1) if m else "0,00"
 
-    m = re.search(r'Total EMPRESA:[\d./\-]+\s+([\d.,]+)', texto)
-    dctf = m.group(1) if m else "NÃO ENCONTRADO"
+    m = re.search(r'Total EMPRESA:[\d./-]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+([\d.,]+)', texto)
+    dctf = m.group(1) if m else "0,00"
 
     return {
         "Codigo_Empresa":   codigo_empresa,
