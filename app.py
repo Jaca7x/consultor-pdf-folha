@@ -16,7 +16,7 @@ def extrair_dados(arquivo):
     m = re.search(r'Empresa:\s*\d+ - (.+)', texto)
     empresa = m.group(1).strip() if m else "NÃO ENCONTRADO"
 
-    m = re.search(r'Total Funcion[aá]rios\s+(\d+)', texto)
+    m = re.search(r'1 - Empregado\s+(\d+)', texto)
     qtd = m.group(1) if m else "NÃO ENCONTRADO"
 
     m = re.search(
