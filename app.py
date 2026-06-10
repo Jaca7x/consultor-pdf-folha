@@ -43,13 +43,13 @@ def extrair_dados(arquivo):
     fgts_11 = m.group(1) if m else "0,00"
 
     m = re.search(r'Empr[eé]stimo Cr[eé]dito do Trabalhador\s+\d+\s+([\d.,]+)', texto)
-    fgts_consignado = m.group(1) if m else ""
+    fgts_consignado = m.group(1) if m else "0,00"
 
     m = re.search(r'Total FGTS Mensal\s+\d+\s+([\d.,]+)', texto)
     fgts_total = m.group(1) if m else "0,00"
 
     m = re.search(r'Total Descontos Sindicais\s+\d+\s+[\d.,]+\s+([\d.,]+)', texto)
-    sindicato = m.group(1) if m else ""
+    sindicato = m.group(1) if m else "0,00"
 
     m = re.search(r'Total CP SEGURADOS\s+([\d.,]+)', texto)
     inss = m.group(1) if m else "0,00"
@@ -57,8 +57,12 @@ def extrair_dados(arquivo):
     m = re.search(r'Total IRRF\s+([\d.,]+)\s+0,00', texto)
     irrf = m.group(1) if m else "0,00"
 
-    m = re.search(r'Total EMPRESA:[\d./-]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+([\d.,]+)', texto)
-    dctf = m.group(1) if m else "0,00"
+    m = re.search(r'Total EMPRESA:[^\n]+', texto)
+    if m:
+        nums = re.findall(r'\d+\.\d{3},\d{2}', m.group(0))
+        dctf = nums[-1] if nums else "0,00"
+    else:
+        dctf = "0,00" 
 
     return {
         "Codigo_Empresa":   codigo_empresa,
