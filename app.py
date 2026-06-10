@@ -41,6 +41,9 @@ def extrair_dados(arquivo):
     m = re.search(r'Total FGTS Mensal\s+\d+\s+([\d.,]+)', texto)
     fgts_total = m.group(1) if m else "NÃO ENCONTRADO"
 
+    m = re.search(r'Total Descontos Sindicais\s+\d+\s+[\d.,]+\s+([\d.,]+)', texto)
+    sindicato = m.group(1) if m else ""
+
     return {
         "Codigo_Empresa": codigo_empresa,
         "Nome_Empresa": nome_empresa,
@@ -51,6 +54,7 @@ def extrair_dados(arquivo):
         "FGTS_11_Mensal": fgts_11,
         "Emprestimo_Credito": emprestimo,
         "FGTS_Total_Mensal": fgts_total,
+        "Total_Sindicato": sindicato,
     }
 
 arquivo = st.file_uploader("Escolha o PDF", type="pdf")
