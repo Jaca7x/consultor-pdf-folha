@@ -32,8 +32,14 @@ def extrair_dados(arquivo):
     m = re.search(r'Total IRRF\s+([\d.,]+)\s+0,00', texto)
     irrf = m.group(1) if m else "NÃO ENCONTRADO"
 
+    m = re.search(r'11 - FGTS mensal\s+([\d.,]+)', texto)
+    fgts_11 = m.group(1) if m else "NÃO ENCONTRADO"
+
+    m = re.search(r'Empr[eé]stimo Cr[eé]dito do Trabalhador\s+\d+\s+([\d.,]+)', texto)
+    emprestimo = m.group(1) if m else "NÃO ENCONTRADO"
+
     m = re.search(r'Total FGTS Mensal\s+\d+\s+([\d.,]+)', texto)
-    fgts = m.group(1) if m else "NÃO ENCONTRADO"
+    fgts_total = m.group(1) if m else "NÃO ENCONTRADO"
 
     return {
         "Codigo_Empresa": codigo_empresa,
@@ -42,7 +48,9 @@ def extrair_dados(arquivo):
         "Total_Liquido": liquido,
         "INSS_Segurados": inss,
         "IRRF_Total": irrf,
-        "FGTS_Mensal": fgts,
+        "FGTS_11_Mensal": fgts_11,
+        "Emprestimo_Credito": emprestimo,
+        "FGTS_Total_Mensal": fgts_total,
     }
 
 arquivo = st.file_uploader("Escolha o PDF", type="pdf")
