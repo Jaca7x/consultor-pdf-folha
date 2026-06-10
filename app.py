@@ -97,10 +97,14 @@ if registros:
     col1, col2 = st.columns(2)
 
     with col1:
-        # Download CSV
-        campos = list(registros[0].keys())
+        # Download CSV — garante colunas fixas independente de registros antigos
+        campos = [
+            "Codigo_Empresa", "Nome_Empresa", "Qtd_Funcionarios",
+            "Total_Liquido", "FGTS_11_Mensal", "FGTS_Consignado",
+            "Total_Sindicato", "INSS_Segurados", "IRRF_Total"
+        ]
         saida = io.StringIO()
-        writer = csv.DictWriter(saida, fieldnames=campos, delimiter=";")
+        writer = csv.DictWriter(saida, fieldnames=campos, delimiter=";", extrasaction="ignore")
         writer.writeheader()
         writer.writerows(registros)
         st.download_button(
