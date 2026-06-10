@@ -46,7 +46,7 @@ def extrair_dados(arquivo):
     fgts_total = m.group(1) if m else "NÃO ENCONTRADO"
 
     m = re.search(r'Total Descontos Sindicais\s+\d+\s+[\d.,]+\s+([\d.,]+)', texto)
-    sindicato = m.group(1) if m else ""
+    sindicato = m.group(1) if m else "0,00"
 
     m = re.search(r'Total CP SEGURADOS\s+([\d.,]+)', texto)
     inss = m.group(1) if m else "NÃO ENCONTRADO"
