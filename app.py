@@ -31,7 +31,7 @@ def extrair_dados(arquivo):
     nome_empresa   = m.group(2).strip() if m else "NÃO ENCONTRADO"
 
     m = re.search(r'1 - Empregado\s+(\d+)', texto)
-    qtd = m.group(1) if m else "0"
+    qtd = m.group(1) if m else "NÃO ENCONTRADO"
 
     m = re.search(
         r'Totais\s*\n\s*Proventos:\s*[\d.,]+\s+Vantagens:\s*[\d.,]+\s+Descontos:\s*[\d.,]+\s+L[íi]quido:\s*([\d.,]+)',
@@ -40,19 +40,25 @@ def extrair_dados(arquivo):
     liquido = m.group(1) if m else "NÃO ENCONTRADO"
 
     m = re.search(r'11 - FGTS mensal\s+([\d.,]+)', texto)
-    fgts_11 = m.group(1) if m else "0,00"
+    fgts_11 = m.group(1) if m else "NÃO ENCONTRADO"
 
     m = re.search(r'Empr[eé]stimo Cr[eé]dito do Trabalhador\s+\d+\s+([\d.,]+)', texto)
-    fgts_consignado = m.group(1) if m else "0,00"
+    fgts_consignado = m.group(1) if m else ""
+
+    m = re.search(r'Total FGTS Mensal\s+\d+\s+([\d.,]+)', texto)
+    fgts_total = m.group(1) if m else "NÃO ENCONTRADO"
 
     m = re.search(r'Total Descontos Sindicais\s+\d+\s+[\d.,]+\s+([\d.,]+)', texto)
-    sindicato = m.group(1) if m else "0,00"
+    sindicato = m.group(1) if m else ""
 
     m = re.search(r'Total CP SEGURADOS\s+([\d.,]+)', texto)
-    inss = m.group(1) if m else "0,00"
+    inss = m.group(1) if m else "NÃO ENCONTRADO"
 
     m = re.search(r'Total IRRF\s+([\d.,]+)\s+0,00', texto)
-    irrf = m.group(1) if m else "0,00"
+    irrf = m.group(1) if m else "NÃO ENCONTRADO"
+
+    m = re.search(r'Total EMPRESA:[\d./\-]+\s+([\d.,]+)', texto)
+    dctf = m.group(1) if m else "NÃO ENCONTRADO"
 
     return {
         "Codigo_Empresa":   codigo_empresa,
@@ -60,10 +66,12 @@ def extrair_dados(arquivo):
         "Qtd_Funcionarios": qtd,
         "Total_Liquido":    liquido,
         "FGTS_11_Mensal":   fgts_11,
-        "FGTS_Consignado": fgts_consignado,
+        "FGTS_Consignado":  fgts_consignado,
+        "FGTS_Total_Mensal": fgts_total,
         "Total_Sindicato":  sindicato,
         "INSS_Segurados":   inss,
         "IRRF_Total":       irrf,
+        "Total_DCTFWeb":    dctf,
     }
 
 # Carrega dados salvos
@@ -101,7 +109,8 @@ if registros:
         campos = [
             "Codigo_Empresa", "Nome_Empresa", "Qtd_Funcionarios",
             "Total_Liquido", "FGTS_11_Mensal", "FGTS_Consignado",
-            "Total_Sindicato", "INSS_Segurados", "IRRF_Total"
+            "FGTS_Total_Mensal", "Total_Sindicato", "INSS_Segurados",
+            "IRRF_Total", "Total_DCTFWeb"
         ]
         saida = io.StringIO()
         writer = csv.DictWriter(saida, fieldnames=campos, delimiter=";", extrasaction="ignore")
