@@ -13,8 +13,9 @@ def extrair_dados(arquivo):
         paginas = [p.extract_text() or "" for p in pdf.pages]
     texto = "\n".join(paginas)
 
-    m = re.search(r'Empresa:\s*\d+ - (.+)', texto)
-    empresa = m.group(1).strip() if m else "NÃO ENCONTRADO"
+    m = re.search(r'Empresa:\s*(\d+) - (.+)', texto)
+    codigo_empresa = m.group(1).strip() if m else "NÃO ENCONTRADO"
+    nome_empresa = m.group(2).strip() if m else "NÃO ENCONTRADO"
 
     m = re.search(r'1 - Empregado\s+(\d+)', texto)
     qtd = m.group(1) if m else "NÃO ENCONTRADO"
@@ -35,7 +36,8 @@ def extrair_dados(arquivo):
     fgts = m.group(1) if m else "NÃO ENCONTRADO"
 
     return {
-        "Empresa": empresa,
+        "Codigo_Empresa": codigo_empresa,
+        "Nome_Empresa": nome_empresa,
         "Qtd_Funcionarios": qtd,
         "Total_Liquido": liquido,
         "INSS_Segurados": inss,
