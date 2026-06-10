@@ -58,7 +58,7 @@ def extrair_dados(arquivo):
     inss = m_inss.group(1) if m_inss else "0,00"
 
     # 6. IRRF (Total da seção Resumo IRRF)
-    m_irrf = re.search(r'Resumo IRRF.*?Total IRRF\s+[\d.,]+\s+([\d.,]+)', texto, re.DOTALL)
+    m_irrf = re.search(r'Demonstrativo DCTFWeb*?Total IRRF\s+[\d.,]+\s+([\d.,]+)', texto, re.DOTALL)
     irrf = m_irrf.group(1) if m_irrf else "0,00"
 
     # 7. Total DCTFWeb (Saldo a Pagar da seção Demonstrativo DCTFWeb)
