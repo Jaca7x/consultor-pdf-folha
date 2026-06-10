@@ -51,10 +51,12 @@ def extrair_dados(arquivo):
     m = re.search(r'Total Descontos Sindicais\s+\d+\s+[\d.,]+\s+([\d.,]+)', texto)
     sindicato = m.group(1) if m else "0,00"
 
-    m = re.search(r'Total CP SEGURADOS\s+([\d.,]+)', texto)
+    # INSS: pega da seção "Resumo Contribuições" → Total CP SEGURADOS
+    m = re.search(r'Resumo Contribui[çc][õo]es.*?Total CP SEGURADOS\s+([\d.,]+)', texto, re.DOTALL)
     inss = m.group(1) if m else "0,00"
 
-    m = re.search(r'Total IRRF\s+([\d.,]+)\s+0,00', texto)
+    # IRRF: pega da seção "Demonstrativo DCTFWeb" → Total IRRF
+    m = re.search(r'Demonstrativo DCTFWeb.*?Total IRRF\s+([\d.,]+)', texto, re.DOTALL)
     irrf = m.group(1) if m else "0,00"
 
     m = re.search(r'Total EMPRESA:[^\n]+', texto)
