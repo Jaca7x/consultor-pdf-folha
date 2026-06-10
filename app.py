@@ -63,22 +63,26 @@ def extrair_dados(arquivo):
 
     fgts_11_somado = float_para_str(valor_11 + valor_12)
 
+    # FGTS Consignado (Empréstimo Crédito do Trabalhador)
+    m_cons = re.search(r'Empr[eé]stimo Cr[eé]dito do Trabalhador\s+\d+\s+([\d.,]+)', texto)
+    fgts_consignado = m_cons.group(1) if m_cons else "0,00"
+
     m_fgts_total = re.search(r'Total FGTS Mensal\s+\d+\s+([\d.,]+)', texto)
     fgts_total = m_fgts_total.group(1) if m_fgts_total else "0,00"
 
-    # 5. INSS (Pegando do Resumo Contribuições)
+    # 5. INSS (Resumo Contribuições)
     m_inss = re.search(r'Resumo Contribui[çc][õo]es.*?Total:\s+([\d.,]+)', texto, re.DOTALL)
     inss = m_inss.group(1) if m_inss else "0,00"
 
-    # 6. IRRF (Pegando do Demonstrativo DCTFWeb - Saldo a Pagar)
+    # 6. IRRF (Demonstrativo DCTFWeb - Saldo a Pagar)
     m_irrf = re.search(r'Total IRRF\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+([\d.,]+)', texto)
     irrf = m_irrf.group(1) if m_irrf else "0,00"
 
-    # 7. Total DCTFWeb (Saldo a Pagar Total da Empresa)
+    # 7. Total DCTFWeb
     m_dctf = re.search(r'Total EMPRESA:.*?([\d.,]+)$', texto, re.MULTILINE)
     dctf = m_dctf.group(1) if m_dctf else "0,00"
 
-    # 8. Sindicato (Total Descontos Sindicais)
+    # 8. Sindicato
     m_sind = re.search(r'Total Descontos Sindicais\s+\d+\s+[\d.,]+\s+([\d.,]+)', texto)
     sindicato = m_sind.group(1) if m_sind else "0,00"
 
@@ -88,16 +92,17 @@ def extrair_dados(arquivo):
         "Qtd_Funcionarios": qtd,
         "Total_Liquido":    liquido,
         "FGTS_11_Somado":   fgts_11_somado,
+        "FGTS_Consignado":  fgts_consignado,
         "FGTS_Total":       fgts_total,
         "INSS":             inss,
         "IRRF":             irrf,
-        "Total_Sindicato":  sindicato, # Campo restaurado
+        "Total_Sindicato":  sindicato,
         "DCTFWeb":          dctf,
     }
 
 # --- Interface Streamlit ---
 registros = carregar_dados()
-arquivo = st.file_uploader("Arraste o PDF da Folha aqui", type=["pdf"])
+arquivo = st.file_uploader("Envie o PDF da Folha", type=["pdf"])
 
 if arquivo:
     conteudo = arquivo.read()
@@ -109,25 +114,23 @@ if arquivo:
         if not any(r['Codigo_Empresa'] == dados['Codigo_Empresa'] for r in registros):
             registros.append(dados)
             salvar_dados(registros)
-            st.success(f"✅ Extraído: {dados['Nome_Empresa']}")
+            st.success(f"✅ Sucesso: {dados['Nome_Empresa']}")
         st.session_state.ultimo_hash = hash_arquivo
 
 if registros:
-    st.subheader("📊 Empresas Processadas")
+    st.subheader("📊 Tabela de Resultados")
     st.table(registros)
 
     col1, col2 = st.columns(2)
     
     with col1:
-        # Colunas na ordem para o CSV
         campos = [
             "Codigo_Empresa", "Nome_Empresa", "Qtd_Funcionarios", 
-            "Total_Liquido", "FGTS_11_Somado", "FGTS_Total", 
-            "INSS", "IRRF", "Total_Sindicato", "DCTFWeb"
+            "Total_Liquido", "FGTS_11_Somado", "FGTS_Consignado", 
+            "FGTS_Total", "INSS", "IRRF", "Total_Sindicato", "DCTFWeb"
         ]
         
         saida = io.StringIO()
-        # extrasaction="ignore" evita erros com dados de colunas antigas que você possa ter no banco
         writer = csv.DictWriter(saida, fieldnames=campos, delimiter=";", extrasaction="ignore")
         writer.writeheader()
         writer.writerows(registros)
@@ -135,11 +138,11 @@ if registros:
         st.download_button(
             label="⬇️ Baixar CSV Completo",
             data=saida.getvalue().encode("utf-8-sig"),
-            file_name="folha_relatorio.csv",
+            file_name="relatorio_folhas_unificado.csv",
             mime="text/csv"
         )
 
     with col2:
-        if st.button("🗑️ Limpar Tabela"):
+        if st.button("🗑️ Limpar Tudo"):
             salvar_dados([])
             st.rerun()
