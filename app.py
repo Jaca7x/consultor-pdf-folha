@@ -16,7 +16,6 @@ STORAGE_FILE = "dados_folhas.json"
 def str_para_float(valor_str):
     if not valor_str:
         return 0.0
-    # Remove pontos de milhar e troca vírgula decimal por ponto
     return float(valor_str.replace('.', '').replace(',', '.'))
 
 def float_para_str(valor_float):
@@ -67,17 +66,21 @@ def extrair_dados(arquivo):
     m_fgts_total = re.search(r'Total FGTS Mensal\s+\d+\s+([\d.,]+)', texto)
     fgts_total = m_fgts_total.group(1) if m_fgts_total else "0,00"
 
-    # 5. INSS (Resumo Contribuições)
+    # 5. INSS (Pegando do Resumo Contribuições)
     m_inss = re.search(r'Resumo Contribui[çc][õo]es.*?Total:\s+([\d.,]+)', texto, re.DOTALL)
     inss = m_inss.group(1) if m_inss else "0,00"
 
-    # 6. IRRF (Seção DCTFWeb -> Total IRRF -> Saldo a Pagar)
+    # 6. IRRF (Pegando do Demonstrativo DCTFWeb - Saldo a Pagar)
     m_irrf = re.search(r'Total IRRF\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+[\d.,]+\s+([\d.,]+)', texto)
     irrf = m_irrf.group(1) if m_irrf else "0,00"
 
-    # 7. Total DCTFWeb (Saldo a Pagar da linha Total EMPRESA)
+    # 7. Total DCTFWeb (Saldo a Pagar Total da Empresa)
     m_dctf = re.search(r'Total EMPRESA:.*?([\d.,]+)$', texto, re.MULTILINE)
     dctf = m_dctf.group(1) if m_dctf else "0,00"
+
+    # 8. Sindicato (Total Descontos Sindicais)
+    m_sind = re.search(r'Total Descontos Sindicais\s+\d+\s+[\d.,]+\s+([\d.,]+)', texto)
+    sindicato = m_sind.group(1) if m_sind else "0,00"
 
     return {
         "Codigo_Empresa":   codigo_empresa,
@@ -88,12 +91,13 @@ def extrair_dados(arquivo):
         "FGTS_Total":       fgts_total,
         "INSS":             inss,
         "IRRF":             irrf,
+        "Total_Sindicato":  sindicato, # Campo restaurado
         "DCTFWeb":          dctf,
     }
 
 # --- Interface Streamlit ---
 registros = carregar_dados()
-arquivo = st.file_uploader("Arraste o PDF aqui", type=["pdf"])
+arquivo = st.file_uploader("Arraste o PDF da Folha aqui", type=["pdf"])
 
 if arquivo:
     conteudo = arquivo.read()
@@ -102,7 +106,6 @@ if arquivo:
 
     if "ultimo_hash" not in st.session_state or st.session_state.ultimo_hash != hash_arquivo:
         dados = extrair_dados(arquivo)
-        # Evita duplicar a mesma empresa na lista
         if not any(r['Codigo_Empresa'] == dados['Codigo_Empresa'] for r in registros):
             registros.append(dados)
             salvar_dados(registros)
@@ -110,25 +113,29 @@ if arquivo:
         st.session_state.ultimo_hash = hash_arquivo
 
 if registros:
-    st.subheader("📊 Dados Extraídos")
+    st.subheader("📊 Empresas Processadas")
     st.table(registros)
 
     col1, col2 = st.columns(2)
     
     with col1:
-        # Colunas que queremos no CSV
-        campos = ["Codigo_Empresa", "Nome_Empresa", "Qtd_Funcionarios", "Total_Liquido", "FGTS_11_Somado", "FGTS_Total", "INSS", "IRRF", "DCTFWeb"]
+        # Colunas na ordem para o CSV
+        campos = [
+            "Codigo_Empresa", "Nome_Empresa", "Qtd_Funcionarios", 
+            "Total_Liquido", "FGTS_11_Somado", "FGTS_Total", 
+            "INSS", "IRRF", "Total_Sindicato", "DCTFWeb"
+        ]
         
         saida = io.StringIO()
-        # 'extrasaction="ignore"' é o que resolve o seu erro!
+        # extrasaction="ignore" evita erros com dados de colunas antigas que você possa ter no banco
         writer = csv.DictWriter(saida, fieldnames=campos, delimiter=";", extrasaction="ignore")
         writer.writeheader()
         writer.writerows(registros)
         
         st.download_button(
-            label="⬇️ Baixar CSV",
+            label="⬇️ Baixar CSV Completo",
             data=saida.getvalue().encode("utf-8-sig"),
-            file_name="folha_pagamento.csv",
+            file_name="folha_relatorio.csv",
             mime="text/csv"
         )
 
